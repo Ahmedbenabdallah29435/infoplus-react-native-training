@@ -1,9 +1,9 @@
 import { useClickSound } from '@/hooks/useClickSound';
 import { useRef, useState } from 'react';
 import {
-  Dimensions,
   FlatList,
   Image,
+  LayoutChangeEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
@@ -12,8 +12,6 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const { width } = Dimensions.get('window');
 
 type Step = {
   emoji: string;
@@ -59,17 +57,27 @@ export default function Onboarding({ onFinish }: Props) {
   const insets = useSafeAreaInsets();
   const playClick = useClickSound();
   const [index, setIndex] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const listRef = useRef<FlatList<Step>>(null);
 
+  const onContainerLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w !== containerWidth) setContainerWidth(w);
+  };
+
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const i = Math.round(e.nativeEvent.contentOffset.x / width);
+    if (containerWidth === 0) return;
+    const i = Math.round(e.nativeEvent.contentOffset.x / containerWidth);
     if (i !== index) setIndex(i);
   };
 
   const goNext = () => {
     playClick();
     if (index < steps.length - 1) {
-      listRef.current?.scrollToOffset({ offset: (index + 1) * width, animated: true });
+      listRef.current?.scrollToOffset({
+        offset: (index + 1) * containerWidth,
+        animated: true,
+      });
     } else {
       onFinish();
     }
@@ -83,7 +91,7 @@ export default function Onboarding({ onFinish }: Props) {
   const isLast = index === steps.length - 1;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={onContainerLayout}>
       <Pressable
         onPress={skip}
         style={({ pressed }) => [
@@ -95,38 +103,41 @@ export default function Onboarding({ onFinish }: Props) {
         <Text style={styles.skipText}>Passer →</Text>
       </Pressable>
 
-      <FlatList
-        ref={listRef}
-        data={steps}
-        keyExtractor={(_, i) => i.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
-        renderItem={({ item }) => (
-          <View style={styles.slide}>
-            <View style={[styles.imageWrap, { marginTop: insets.top + 60 }]}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <View style={styles.imageOverlay} />
-              <Text style={styles.emoji}>{item.emoji}</Text>
+      {containerWidth > 0 && (
+        <FlatList
+          ref={listRef}
+          data={steps}
+          keyExtractor={(_, i) => i.toString()}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          getItemLayout={(_, i) => ({
+            length: containerWidth,
+            offset: containerWidth * i,
+            index: i,
+          })}
+          renderItem={({ item }) => (
+            <View style={[styles.slide, { width: containerWidth }]}>
+              <View style={[styles.imageWrap, { marginTop: insets.top + 60 }]}>
+                <Image source={{ uri: item.image }} style={styles.image} />
+                <View style={styles.imageOverlay} />
+                <Text style={styles.emoji}>{item.emoji}</Text>
+              </View>
+              <View style={styles.textWrap}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.description}>{item.description}</Text>
+              </View>
             </View>
-            <View style={styles.textWrap}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.description}>{item.description}</Text>
-            </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.dots}>
           {steps.map((_, i) => (
-            <View
-              key={i}
-              style={[styles.dot, i === index && styles.dotActive]}
-            />
+            <View key={i} style={[styles.dot, i === index && styles.dotActive]} />
           ))}
         </View>
         <Pressable
@@ -159,7 +170,6 @@ const styles = StyleSheet.create({
   skipText: { color: '#fff', fontWeight: '600', fontSize: 13 },
   pressed: { opacity: 0.7, transform: [{ scale: 0.97 }] },
   slide: {
-    width,
     alignItems: 'center',
     paddingHorizontal: 32,
   },
