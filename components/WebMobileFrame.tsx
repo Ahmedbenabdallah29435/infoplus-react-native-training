@@ -85,8 +85,7 @@ export default function WebMobileFrame({ children }: { children: ReactNode }) {
 
       <View style={styles.bottomCredit}>
         <Text style={styles.bottomText}>
-          Made with <Text style={styles.heart}>❤</Text> by{' '}
-          <Text style={styles.author}>Ahmed Ben Abdallah</Text>
+          Made by <Text style={styles.author}>Ahmed Ben Abdallah</Text>
         </Text>
         <Text style={styles.bottomSubtext}>React Native Instructor · InfoPlus Bizerte</Text>
       </View>
