@@ -3,15 +3,46 @@ import ProfileCardTest from '@/components/ProfileCardTest';
 import UserDemo from '@/components/UserDemo';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useClickSound } from '@/hooks/useClickSound';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfilScreen() {
   const insets = useSafeAreaInsets();
   const { dark, toggleDark } = useTheme();
   const playClick = useClickSound();
+  const { session } = useAuth();
+
+  const userEmail = session?.user?.email ?? '';
+  const userInitial = userEmail.charAt(0).toUpperCase() || '?';
+  const createdAt = session?.user?.created_at
+    ? new Date(session.user.created_at).toLocaleDateString('fr-FR')
+    : '—';
+
+  const doLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      if (Platform.OS === 'web') window.alert(error.message);
+      else Alert.alert('Erreur', error.message);
+    }
+  };
+
+  const handleLogout = () => {
+    playClick();
+    if (Platform.OS === 'web') {
+      if (window.confirm('Tu veux vraiment te déconnecter ?')) {
+        doLogout();
+      }
+    } else {
+      Alert.alert('Déconnexion', 'Tu veux vraiment te déconnecter ?', [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Se déconnecter', style: 'destructive', onPress: doLogout },
+      ]);
+    }
+  };
   const [nom, setNom] = useState('Ahmed Ben Salah');
   const [bio, setBio] = useState('Étudiant en développement mobile');
   const bg = dark ? '#1A1F36' : '#F0F4F8';
@@ -58,6 +89,29 @@ export default function ProfilScreen() {
             <Text style={styles.themeBtnText}>{dark ? '☀️ Clair' : '🌙 Sombre'}</Text>
           </Pressable>
         </View>
+
+        <View style={[styles.authCard, { backgroundColor: dark ? '#2A3047' : '#fff' }]}>
+          <View style={styles.authRow}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{userInitial}</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 14 }}>
+              <Text style={[styles.authEmail, { color: textColor }]} numberOfLines={1}>
+                {userEmail || 'Utilisateur anonyme'}
+              </Text>
+              <Text style={[styles.authMeta, { color: dark ? '#9AA0B6' : '#666' }]}>
+                Compte créé le {createdAt}
+              </Text>
+            </View>
+          </View>
+          <Pressable
+            onPress={handleLogout}
+            style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}
+          >
+            <Text style={styles.logoutBtnText}>🚪 Se déconnecter</Text>
+          </Pressable>
+        </View>
+
         <ProfileCard
           nom={nom}
           bio={bio}
@@ -157,6 +211,44 @@ const styles = StyleSheet.create({
   },
   themeBtnText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   pressed: { opacity: 0.7, transform: [{ scale: 0.97 }] },
+  authCard: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#0D47A1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  authRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#0D47A1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  authEmail: { fontSize: 15, fontWeight: 'bold' },
+  authMeta: { fontSize: 12, marginTop: 2 },
+  logoutBtn: {
+    backgroundColor: '#E53935',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  logoutBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
   section: {
     padding: 16,
     marginHorizontal: 16,

@@ -69,7 +69,7 @@ export default function Onboarding({ onFinish }: Props) {
   const goNext = () => {
     playClick();
     if (index < steps.length - 1) {
-      listRef.current?.scrollToIndex({ index: index + 1, animated: true });
+      listRef.current?.scrollToOffset({ offset: (index + 1) * width, animated: true });
     } else {
       onFinish();
     }
@@ -104,6 +104,7 @@ export default function Onboarding({ onFinish }: Props) {
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}
+        getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
         renderItem={({ item }) => (
           <View style={styles.slide}>
             <View style={[styles.imageWrap, { marginTop: insets.top + 60 }]}>
