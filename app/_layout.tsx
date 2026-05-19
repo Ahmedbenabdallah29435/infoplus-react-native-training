@@ -7,6 +7,7 @@ import 'react-native-reanimated';
 
 import AnimatedSplash from '@/components/AnimatedSplash';
 import Onboarding from '@/components/Onboarding';
+import WebMobileFrame from '@/components/WebMobileFrame';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -32,15 +33,17 @@ export default function RootLayout() {
         <ThemeProvider>
           <OnboardingProvider>
             <NavThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen name="signup" options={{ headerShown: false }} />
-                <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-              </Stack>
-              <StatusBar style="auto" />
-              <OnboardingOverlay />
-              {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
+              <WebMobileFrame>
+                <Stack>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="login" options={{ headerShown: false }} />
+                  <Stack.Screen name="signup" options={{ headerShown: false }} />
+                  <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+                </Stack>
+                <StatusBar style="auto" />
+                <OnboardingOverlay />
+                {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
+              </WebMobileFrame>
             </NavThemeProvider>
           </OnboardingProvider>
         </ThemeProvider>

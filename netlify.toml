@@ -1,0 +1,17 @@
+# Netlify build configuration for the Expo (Expo Router) web export.
+
+[build]
+  command = "npx expo export --platform web"
+  publish = "dist"
+
+[build.environment]
+  # Force Node 22 — Supabase needs native WebSocket (not in Node 20).
+  NODE_VERSION = "22"
+
+# Single-Page App fallback: any unknown URL serves index.html so
+# Expo Router can resolve the route on the client. Without this,
+# refreshing /login or /signup would return a 404 on Netlify.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
