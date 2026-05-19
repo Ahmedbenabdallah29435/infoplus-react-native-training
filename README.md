@@ -1,5 +1,7 @@
 # 📱 InfoPlus App — Formation React Native
 
+🌐 **Langues :** **Français** · [🇬🇧 English](README.en.md)
+
 ## 👨‍🏫 Contexte pédagogique
 
 > Ce dépôt est maintenu par **Ahmed Ben Abdallah**, dans le cadre d'une **mission d'enseignement** au centre **InfoPlus Bizerte**.
