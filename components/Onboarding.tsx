@@ -1,9 +1,9 @@
 import { useClickSound } from '@/hooks/useClickSound';
-import { Image } from 'expo-image';
 import { useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
+  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
@@ -168,16 +168,23 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 110,
     overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 32,
   },
-  image: { width: '100%', height: '100%' },
+  image: { width: 220, height: 220, position: 'absolute', top: 0, left: 0 },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(13,71,161,0.5)',
   },
-  emoji: { fontSize: 80, position: 'absolute' },
+  emoji: {
+    fontSize: 80,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 220,
+    height: 220,
+    textAlign: 'center',
+    lineHeight: 220,
+  },
   textWrap: { alignItems: 'center' },
   title: {
     fontSize: 26,

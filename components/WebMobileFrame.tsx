@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 const PHONE_WIDTH = 400;
@@ -64,7 +64,11 @@ function AnimatedBackground() {
  */
 export default function WebMobileFrame({ children }: { children: ReactNode }) {
   const { width } = useWindowDimensions();
-  const isDesktopWeb = Platform.OS === 'web' && width >= DESKTOP_BREAKPOINT;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Skip frame during SSR + first client paint to avoid hydration mismatch.
+  const isDesktopWeb = mounted && Platform.OS === 'web' && width >= DESKTOP_BREAKPOINT;
 
   if (!isDesktopWeb) return <>{children}</>;
 
