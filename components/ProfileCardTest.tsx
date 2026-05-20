@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-
+//comment
 type ProfileProps = {
   title?: string;
   description: string;
